@@ -2,14 +2,10 @@ FROM node:22-slim
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY frontend/package*.json ./frontend/
+COPY . .
 
 RUN npm install
 RUN npm install --prefix frontend
-
-COPY . .
-
 RUN npm run build
 
 EXPOSE 5000

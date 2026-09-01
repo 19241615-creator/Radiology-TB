@@ -7,8 +7,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "build-frontend": "npm run build --prefix frontend",
-    "build": "npm run build-frontend",
-    "postinstall": "npm install --prefix frontend && npm run build"
+    "build": "npm run build-frontend"
   },
   "engines": {
     "node": ">=22.5.0"
