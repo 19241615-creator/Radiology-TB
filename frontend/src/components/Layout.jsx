@@ -254,7 +254,7 @@ export default function Layout({ children }) {
             {!isSidebarCollapsed ? (
               <div className="flex items-center gap-3 overflow-hidden animate-in fade-in duration-300">
                 <img 
-                  src="/logo.jpg" 
+                  src="/logo.png" 
                   alt="Logo Radiology TB" 
                   className="w-10 h-10 rounded-full border border-white/20 object-cover shadow-sm shrink-0"
                 />
@@ -265,7 +265,7 @@ export default function Layout({ children }) {
               </div>
             ) : (
               <img 
-                src="/logo.jpg" 
+                src="/logo.png" 
                 alt="Logo Radiology TB" 
                 className="w-10 h-10 rounded-full border border-white/20 object-cover shadow-sm shrink-0 cursor-pointer"
                 onClick={() => {
@@ -403,7 +403,7 @@ export default function Layout({ children }) {
         <div className="px-margin-page mb-margin-page flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img 
-              src="/logo.jpg" 
+              src="/logo.png" 
               alt="Logo Radiology TB" 
               className="w-10 h-10 rounded-full border border-white/20 object-cover shadow-sm"
             />

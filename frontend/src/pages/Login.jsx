@@ -86,7 +86,7 @@ export default function Login() {
         {/* Top Left Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <img 
-            src="/logo.jpg" 
+            src="/logo.png" 
             alt="Logo Radiology TB" 
             className="w-11 h-11 rounded-full border border-white/20 object-cover shadow-md"
           />
