@@ -1,0 +1,450 @@
+@import "tailwindcss";
+
+@theme {
+  /* Design system colors from the new teal-mint design reference */
+  --color-primary: #00475e;
+  --color-primary-container: #1a5f7a;
+  --color-primary-fixed: #c0e8ff;
+  --color-primary-fixed-dim: #92cfee;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #9bd7f7;
+  --color-on-primary-fixed: #001e2b;
+  --color-on-primary-fixed-variant: #004d66;
+
+  --color-secondary: #006b5b;
+  --color-secondary-container: #7cf8dd;
+  --color-secondary-fixed: #7cf8dd;
+  --color-secondary-fixed-dim: #5ddbc1;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #007261;
+  --color-on-secondary-fixed: #00201a;
+  --color-on-secondary-fixed-variant: #005144;
+
+  --color-tertiary: #184175;
+  --color-tertiary-container: #34598e;
+  --color-tertiary-fixed: #d5e3ff;
+  --color-tertiary-fixed-dim: #a7c8ff;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #b6d0ff;
+  --color-on-tertiary-fixed: #001b3c;
+  --color-on-tertiary-fixed-variant: #1f477b;
+
+  --color-background: #f6fafe;
+  --color-on-background: #171c1f;
+
+  --color-surface: #f6fafe;
+  --color-surface-dim: #d6dade;
+  --color-surface-bright: #f6fafe;
+  --color-surface-tint: #236580;
+  --color-surface-variant: #dfe3e7;
+  --color-on-surface: #171c1f;
+  --color-on-surface-variant: #40484d;
+
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f4f8;
+  --color-surface-container: #eaeef2;
+  --color-surface-container-high: #e4e9ed;
+  --color-surface-container-highest: #dfe3e7;
+  
+  --color-surface-slate: #f8fafc;
+  --color-border-crisp: #e2e8f0;
+
+  --color-inverse-surface: #2c3134;
+  --color-inverse-on-surface: #edf1f5;
+  --color-inverse-primary: #92cfee;
+
+  --color-outline: #70787d;
+  --color-outline-variant: #c0c8cd;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Custom status colors */
+  --color-status-green: #10b981;
+  --color-status-amber: #f59e0b;
+  --color-status-red: #ef4444;
+  --color-text-primary: #0f172a;
+  --color-text-muted: #475569;
+
+  /* Custom spacing names from reference (converted to rem for global scaling) */
+  --spacing-gutter: 1rem;
+  --spacing-container-max: 90rem;
+  --spacing-sidebar-width: 15rem;
+  --spacing-base: 0.25rem;
+  
+  --spacing-gap-xs: 0.375rem;
+  --spacing-gap-md: 0.75rem;
+  --spacing-gap-lg: 1rem;
+  --spacing-margin-page: 1.25rem;
+  --spacing-margin-mobile: 0.75rem;
+}
+
+html {
+  font-size: 13.2px; /* Global scale reduction (creates the exact look of 80%-82% zoom level at 100%) */
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14.5px; /* Slightly larger on mobile for readability */
+  }
+}
+
+body {
+  @apply bg-background text-on-background antialiased;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Custom Animation Classes from Design */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseShimmer {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6);
+  }
+}
+
+@keyframes slideDownModal {
+  from {
+    transform: translateY(-80px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-slide-down-modal {
+  animation: slideDownModal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.animate-pulse-shimmer {
+  animation: pulseShimmer 3s infinite ease-in-out;
+}
+
+/* Custom Print Styles for PDF Report Export */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Custom Design System Typography Helpers */
+.font-label-caps {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.text-label-caps {
+  font-size: 11px;
+  line-height: 14px;
+}
+.font-display-lg {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.text-display-lg {
+  font-size: 26px;
+  line-height: 32px;
+}
+.font-display-lg-mobile {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.text-display-lg-mobile {
+  font-size: 20px;
+  line-height: 26px;
+}
+.font-display-md {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.text-display-md {
+  font-size: 20px;
+  line-height: 26px;
+}
+.font-headline-md {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.text-headline-md {
+  font-size: 17px;
+  line-height: 22px;
+}
+.font-mono-data {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.text-mono-data {
+  font-size: 13px;
+  line-height: 18px;
+}
+.font-body-md {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+.text-body-md {
+  font-size: 14px;
+  line-height: 20px;
+}
+.font-body-lg {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+.text-body-lg {
+  font-size: 16px;
+  line-height: 24px;
+}
+.font-body-sm {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+.text-body-sm {
+  font-size: 12px;
+  line-height: 16px;
+}
+.font-headline-sm {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+.text-headline-sm {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom CSS Print Rules for PDF Export */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 6mm 8mm 6mm; /* Tight margins to maximize printable width */
+  }
+  
+  /* Reset HTML and Body heights to allow multi-page flow */
+  html, body {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Reset Layout wrappers to prevent height locking and overflow clipping */
+  #root,
+  .h-screen,
+  .min-h-screen,
+  div[class*="h-screen"],
+  div[class*="overflow-hidden"],
+  div[class*="overflow-y-auto"] {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: static !important;
+    background: transparent !important;
+  }
+
+  /* Ensure main container flows naturally */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    width: 100% !important;
+    position: static !important;
+  }
+
+  /* Prevent scroll containers from clipping in print */
+  .overflow-x-auto {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Enforce hidden elements in print */
+  .no-print,
+  .print\:hidden,
+  aside,
+  header {
+    display: none !important;
+  }
+
+  /* Force showing official report header in print */
+  .print-only,
+  .print-header,
+  .print\:block {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Reset all scroll reveal and animations for print */
+  *, ::before, ::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .scroll-reveal,
+  .row-pop-in {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+
+  /* Scale the table for printing */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+    font-size: 8px !important; /* Tiny text to fit A4 Portrait */
+    word-wrap: break-word !important;
+  }
+
+  th, td {
+    padding: 4px 3px !important; /* Extremely tight padding */
+    border: 0.5px solid #94a3b8 !important; /* Thinner border for high density */
+    text-align: left !important;
+    word-break: break-word !important;
+    white-space: normal !important; /* Force text wrapping */
+  }
+
+  th {
+    background-color: #f1f5f9 !important;
+    color: #000000 !important;
+    font-weight: bold !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Remove card shadow and border style for print compatibility */
+  .print-card {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* Default screen view: hide print-only headers */
+.print-only,
+.print-header {
+  display: none;
+}
+
+/* Smooth Scroll & Scroll-Driven Reveal Animations */
+html, main, .overflow-y-auto {
+  scroll-behavior: smooth;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px) scale(0.985);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.delay-stagger-1 { transition-delay: 60ms; }
+.delay-stagger-2 { transition-delay: 120ms; }
+.delay-stagger-3 { transition-delay: 180ms; }
+.delay-stagger-4 { transition-delay: 240ms; }
+
+/* Table Row & Text Pop-In Scroll Animation */
+@keyframes popInRow {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  70% {
+    transform: translateY(-1px) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.row-pop-in {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.row-pop-in.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
