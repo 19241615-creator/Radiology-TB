@@ -568,7 +568,8 @@ app.post('/api/examinations', authenticateToken, authorizeRoles('admin', 'radiog
     patient_id, patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
     examination_date, diagnosis, risk_category, follow_up_status, additional_info,
     dicom_filename, dicom_filesize, dicom_metadata, validation_status,
-    pre_action_checklist, post_action_checklist, queue_status, reporting_status
+    pre_action_checklist, post_action_checklist, queue_status, reporting_status,
+    examination_type, referring_doctor, sending_unit, film_usage, exposure_params, service_duration
   } = req.body;
 
   if (!patient_id || !patient_name || !medical_record_number || !age || !gender || !fasyankes_origin || !examination_date) {
@@ -587,8 +588,9 @@ app.post('/api/examinations', authenticateToken, authorizeRoles('admin', 'radiog
         patient_id, patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
         examination_date, diagnosis, risk_category, follow_up_status, radiographer_name, additional_info,
         dicom_filename, dicom_filesize, dicom_metadata, validation_status,
-        pre_action_checklist, post_action_checklist, queue_status, reporting_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        pre_action_checklist, post_action_checklist, queue_status, reporting_status,
+        examination_type, referring_doctor, sending_unit, film_usage, exposure_params, service_duration
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = insertStmt.run(
@@ -612,7 +614,13 @@ app.post('/api/examinations', authenticateToken, authorizeRoles('admin', 'radiog
       pre_action_checklist ? JSON.stringify(pre_action_checklist) : null,
       post_action_checklist ? JSON.stringify(post_action_checklist) : null,
       queue_status || (dicom_filename ? 'Selesai' : 'Menunggu Tindakan'),
-      reporting_status || (dicom_filename ? 'Sudah Dilaporkan' : 'Belum Dilaporkan')
+      reporting_status || (dicom_filename ? 'Sudah Dilaporkan' : 'Belum Dilaporkan'),
+      examination_type || 'Radiografi Thoraks (Thorax PA)',
+      referring_doctor || 'dr. Sp.P / Tim TB',
+      sending_unit || 'Poli TB / Paru',
+      film_usage || 'Film 35x43 cm (1 Lembar)',
+      exposure_params || '115 kV, 4 mAs, FFD 180 cm',
+      service_duration ? parseInt(service_duration) : 12
     );
 
     logActivity(
@@ -640,7 +648,8 @@ app.put('/api/examinations/:id', authenticateToken, authorizeRoles('admin', 'rad
     patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
     examination_date, diagnosis, risk_category, follow_up_status, additional_info,
     dicom_filename, dicom_filesize, dicom_metadata, validation_status,
-    pre_action_checklist, post_action_checklist, queue_status, reporting_status
+    pre_action_checklist, post_action_checklist, queue_status, reporting_status,
+    examination_type, referring_doctor, sending_unit, film_usage, exposure_params, service_duration
   } = req.body;
 
   try {
@@ -657,6 +666,7 @@ app.put('/api/examinations/:id', authenticateToken, authorizeRoles('admin', 'rad
           examination_date = ?, diagnosis = ?, risk_category = ?, follow_up_status = ?, additional_info = ?,
           dicom_filename = ?, dicom_filesize = ?, dicom_metadata = ?, validation_status = ?,
           pre_action_checklist = ?, post_action_checklist = ?, queue_status = ?, reporting_status = ?,
+          examination_type = ?, referring_doctor = ?, sending_unit = ?, film_usage = ?, exposure_params = ?, service_duration = ?,
           radiographer_name = CASE WHEN ? = 'radiographer' THEN ? ELSE radiographer_name END,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
@@ -682,6 +692,12 @@ app.put('/api/examinations/:id', authenticateToken, authorizeRoles('admin', 'rad
       post_action_checklist !== undefined ? (post_action_checklist ? JSON.stringify(post_action_checklist) : null) : exam.post_action_checklist,
       queue_status || exam.queue_status,
       reporting_status || exam.reporting_status,
+      examination_type || exam.examination_type || 'Radiografi Thoraks (Thorax PA)',
+      referring_doctor || exam.referring_doctor || 'dr. Sp.P / Tim TB',
+      sending_unit || exam.sending_unit || 'Poli TB / Paru',
+      film_usage || exam.film_usage || 'Film 35x43 cm (1 Lembar)',
+      exposure_params || exam.exposure_params || '115 kV, 4 mAs, FFD 180 cm',
+      service_duration !== undefined ? parseInt(service_duration) : (exam.service_duration || 12),
       req.user.role,
       req.user.name,
       examId
@@ -756,6 +772,11 @@ app.get('/api/reports/summary', authenticateToken, (req, res) => {
     const unreportedExam = db.prepare("SELECT COUNT(*) as count FROM examinations WHERE reporting_status = 'Belum Dilaporkan'").get().count;
     const incompleteExam = db.prepare("SELECT COUNT(*) as count FROM examinations WHERE reporting_status = 'Data Belum Lengkap'").get().count;
     const reportedExam = db.prepare("SELECT COUNT(*) as count FROM examinations WHERE reporting_status = 'Sudah Dilaporkan'").get().count;
+    
+    // Average service duration (minutes) & Logistics/Film usage count
+    const avgDurationRow = db.prepare('SELECT AVG(service_duration) as avgDur FROM examinations WHERE service_duration IS NOT NULL').get();
+    const avgServiceDuration = Math.round(avgDurationRow?.avgDur || 12);
+    const totalFilmUsage = totalExam; // 1 sheet/exposure per examination record
 
     // Trend by date for chart (last 60 days of examinations)
     const getTrend = db.prepare(`
@@ -784,7 +805,7 @@ app.get('/api/reports/summary', authenticateToken, (req, res) => {
 
     // Latest 5 examinations for dashboard table
     const getLatest = db.prepare(`
-      SELECT id, patient_id, patient_name, age, gender, fasyankes_origin, examination_date, risk_category, reporting_status
+      SELECT id, patient_id, patient_name, age, gender, fasyankes_origin, examination_date, risk_category, reporting_status, film_usage, service_duration
       FROM examinations 
       ORDER BY created_at DESC 
       LIMIT 5
@@ -798,7 +819,9 @@ app.get('/api/reports/summary', authenticateToken, (req, res) => {
         month: monthExam,
         unreported: unreportedExam,
         incomplete: incompleteExam,
-        reported: reportedExam
+        reported: reportedExam,
+        avgServiceDuration,
+        totalFilmUsage
       },
       charts: {
         trend,

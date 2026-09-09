@@ -169,8 +169,48 @@ export default function ExaminationDetail() {
                 <span className="font-semibold text-slate-900 mt-0.5 block">{exam.fasyankes_origin}</span>
               </div>
               <div>
+                <span className="text-xs text-slate-400 block font-medium">Unit / Poli Pengirim</span>
+                <span className="font-semibold text-slate-900 mt-0.5 block">{exam.sending_unit || 'Poli TB / Paru'}</span>
+              </div>
+              <div>
+                <span className="text-xs text-slate-400 block font-medium">Dokter Pengirim / Perujuk</span>
+                <span className="font-semibold text-slate-900 mt-0.5 block">{exam.referring_doctor || 'dr. Sp.P / Tim TB'}</span>
+              </div>
+              <div>
+                <span className="text-xs text-slate-400 block font-medium">Jenis Pemeriksaan</span>
+                <span className="font-semibold text-slate-900 mt-0.5 block">{exam.examination_type || 'Radiografi Thoraks (Thorax PA)'}</span>
+              </div>
+              <div>
                 <span className="text-xs text-slate-400 block font-medium">Tanggal Pemeriksaan</span>
                 <span className="font-semibold text-slate-900 mt-0.5 block">{exam.examination_date}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Logistik Film & Parameter Eksposi */}
+          <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Pemakaian Logistik & Parameter Radiografi</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Data pemakaian film rontgen, faktor eksposi, dan durasi pelayanan.</p>
+              </div>
+              <span className="px-2.5 py-1 bg-amber-50 text-amber-700 font-bold text-[11px] rounded-lg border border-amber-200">
+                Logistik & Parameter
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                <span className="text-xs text-slate-400 block font-medium">Pemakaian Logistik / Film</span>
+                <span className="font-bold text-slate-800 mt-1 block">🎞️ {exam.film_usage || 'Film 35x43 cm (1 Lembar)'}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                <span className="text-xs text-slate-400 block font-medium">Parameter Eksposi (kV / mAs / FFD)</span>
+                <span className="font-bold text-slate-800 mt-1 block">⚡ {exam.exposure_params || '115 kV, 4 mAs, FFD 180 cm'}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                <span className="text-xs text-slate-400 block font-medium">Durasi Waktu Pelayanan</span>
+                <span className="font-bold text-blue-700 mt-1 block">⏱️ {exam.service_duration || 12} Menit</span>
               </div>
             </div>
           </div>

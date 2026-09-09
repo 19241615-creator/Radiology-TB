@@ -29,6 +29,12 @@ export default function ExaminationAddEdit() {
     age: '',
     gender: 'L',
     fasyankes_origin: '',
+    sending_unit: 'Poli TB / Paru',
+    referring_doctor: 'dr. Sp.P / Tim TB',
+    examination_type: 'Radiografi Thoraks (Thorax PA)',
+    film_usage: 'Film 35x43 cm (1 Lembar)',
+    exposure_params: '115 kV, 4 mAs, FFD 180 cm',
+    service_duration: 12,
     examination_date: new Date().toISOString().split('T')[0],
     diagnosis: '',
     risk_category: 'Rendah',
@@ -92,6 +98,12 @@ export default function ExaminationAddEdit() {
             age: data.age,
             gender: data.gender,
             fasyankes_origin: data.fasyankes_origin,
+            sending_unit: data.sending_unit || 'Poli TB / Paru',
+            referring_doctor: data.referring_doctor || 'dr. Sp.P / Tim TB',
+            examination_type: data.examination_type || 'Radiografi Thoraks (Thorax PA)',
+            film_usage: data.film_usage || 'Film 35x43 cm (1 Lembar)',
+            exposure_params: data.exposure_params || '115 kV, 4 mAs, FFD 180 cm',
+            service_duration: data.service_duration !== undefined ? data.service_duration : 12,
             examination_date: data.examination_date,
             diagnosis: data.diagnosis || '',
             risk_category: data.risk_category || 'Rendah',
@@ -516,7 +528,7 @@ export default function ExaminationAddEdit() {
 
               {/* Origin Puskesmas */}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Asal Fasyankes / Puskesmas Perujuk *</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Asal Fasyankes / Instansi Perujuk *</label>
                 <input
                   type="text"
                   name="fasyankes_origin"
@@ -526,6 +538,47 @@ export default function ExaminationAddEdit() {
                   placeholder="Contoh: Puskesmas Gambir"
                   className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 />
+              </div>
+
+              {/* Unit Pengirim */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Unit / Poli Pengirim *</label>
+                <input
+                  type="text"
+                  name="sending_unit"
+                  value={formData.sending_unit}
+                  onChange={handleInputChange}
+                  placeholder="Contoh: Poli TB / Rawat Jalan / IGD"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              {/* Dokter Pengirim */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Dokter Pengirim / Perujuk *</label>
+                <input
+                  type="text"
+                  name="referring_doctor"
+                  value={formData.referring_doctor}
+                  onChange={handleInputChange}
+                  placeholder="Contoh: dr. Budiarto, Sp.P"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              {/* Jenis Pemeriksaan */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Jenis Pemeriksaan Radiologi *</label>
+                <select
+                  name="examination_type"
+                  value={formData.examination_type}
+                  onChange={handleInputChange}
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-white font-medium"
+                >
+                  <option value="Radiografi Thoraks (Thorax PA)">Radiografi Thoraks (Thorax PA) - Skrining TB</option>
+                  <option value="Radiografi Thoraks (Thorax AP)">Radiografi Thoraks (Thorax AP)</option>
+                  <option value="Radiografi Thoraks Lateral">Radiografi Thoraks Lateral (PA + Lateral)</option>
+                </select>
               </div>
 
               {/* Examination Date */}
@@ -569,6 +622,62 @@ export default function ExaminationAddEdit() {
                   <option value="Data Belum Lengkap">Data Belum Lengkap</option>
                   <option value="Sudah Dilaporkan">Sudah Dilaporkan</option>
                 </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Pemakaian Logistik & Parameter Gambar (Radiografer) */}
+          <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Logistik Film & Parameter Radiografi</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Pencatatan pemakaian film/kaset, eksposi gambar, dan durasi pelayanan radiologi.</p>
+              </div>
+              <span className="px-2.5 py-1 bg-amber-50 text-amber-700 font-bold text-[11px] rounded-lg border border-amber-200">
+                Logistik & Parameter
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Pemakaian Film / Logistik *</label>
+                <select
+                  name="film_usage"
+                  value={formData.film_usage}
+                  onChange={handleInputChange}
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-white font-medium"
+                >
+                  <option value="Film 35x43 cm (1 Lembar)">Film 35x43 cm (1 Lembar)</option>
+                  <option value="Film 30x40 cm (1 Lembar)">Film 30x40 cm (1 Lembar)</option>
+                  <option value="Film 24x30 cm (1 Lembar)">Film 24x30 cm (1 Lembar)</option>
+                  <option value="Digital DR/PACS (Tanpa Film Fisik)">Digital DR/PACS (Tanpa Film Fisik)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Parameter Gambar (Eksposi) *</label>
+                <input
+                  type="text"
+                  name="exposure_params"
+                  value={formData.exposure_params}
+                  onChange={handleInputChange}
+                  placeholder="Contoh: 115 kV, 4 mAs, FFD 180 cm"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Durasi Pelayanan (Menit) *</label>
+                <input
+                  type="number"
+                  name="service_duration"
+                  min="1"
+                  max="120"
+                  value={formData.service_duration}
+                  onChange={handleInputChange}
+                  placeholder="12"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
+                />
               </div>
             </div>
           </div>

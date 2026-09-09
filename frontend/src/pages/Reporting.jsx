@@ -115,10 +115,18 @@ export default function Reporting() {
         'ID Pasien': record.patient_id,
         'Nama Pasien': record.patient_name,
         'No Rekam Medis': record.medical_record_number,
+        'No Telepon/WA': record.phone_number || '-',
         'Usia': record.age,
         'L/P': record.gender,
         'Asal Fasyankes Perujuk': record.fasyankes_origin,
+        'Unit / Poli Pengirim': record.sending_unit || 'Poli TB / Paru',
+        'Dokter Pengirim': record.referring_doctor || 'dr. Sp.P / Tim TB',
+        'Jenis Pemeriksaan': record.examination_type || 'Radiografi Thoraks (Thorax PA)',
         'Tanggal Pemeriksaan': record.examination_date,
+        'Status Antrean': record.queue_status || 'Selesai',
+        'Pemakaian Logistik/Film': record.film_usage || 'Film 35x43 cm (1 Lembar)',
+        'Parameter Eksposi': record.exposure_params || '115 kV, 4 mAs, FFD 180 cm',
+        'Durasi Pelayanan (Menit)': record.service_duration || 12,
         'Hasil Radiologi': record.diagnosis,
         'Kategori Risiko': record.risk_category,
         'Tindak Lanjut': record.follow_up_status,
@@ -147,15 +155,15 @@ export default function Reporting() {
     window.print();
   };
 
-  const stats = summary || { total: 0, today: 0, month: 0, unreported: 0, incomplete: 0, reported: 0 };
+  const stats = summary || { total: 0, today: 0, month: 0, unreported: 0, incomplete: 0, reported: 0, avgServiceDuration: 12, totalFilmUsage: 0 };
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Pelaporan & Rekap</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Pantau status pelaporan skrining TB dan ekspor data pemeriksaan.</p>
+          <h2 className="text-2xl font-bold text-slate-800">Pelaporan & Rekap Skrining TB</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Analisis jumlah pasien, evaluasi logistik film, durasi pelayanan, dan ekspor data.</p>
         </div>
         <div className="flex gap-3">
           <button
@@ -163,7 +171,7 @@ export default function Reporting() {
             className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow-md transition"
           >
             <FileSpreadsheet size={16} />
-            <span>Ekspor Excel</span>
+            <span>Ekspor Excel Lengkap</span>
           </button>
           <button
             onClick={handlePrint}
@@ -183,56 +191,82 @@ export default function Reporting() {
       )}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 print:hidden">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 print:hidden">
         {/* Total Data */}
-        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all flex items-center justify-between print-card">
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase block">Total Data</span>
-            <span className="text-2xl font-extrabold text-slate-800 mt-1 block">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase block">Total Skrining</span>
+            <span className="text-xl font-extrabold text-slate-800 mt-0.5 block">
               <AnimatedCounter value={stats.total} />
             </span>
           </div>
-          <div className="bg-slate-50 text-slate-600 p-2.5 rounded-lg no-print">
-            <Database size={20} />
+          <div className="bg-slate-50 text-slate-600 p-2 rounded-lg">
+            <Database size={18} />
           </div>
         </div>
 
         {/* Sudah Dilaporkan */}
-        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all flex items-center justify-between print-card">
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase block">Dilaporkan</span>
-            <span className="text-2xl font-extrabold text-emerald-600 mt-1 block">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase block">Dilaporkan</span>
+            <span className="text-xl font-extrabold text-emerald-600 mt-0.5 block">
               <AnimatedCounter value={stats.reported} />
             </span>
           </div>
-          <div className="bg-emerald-50 text-emerald-600 p-2.5 rounded-lg no-print">
-            <CheckCircle size={20} />
+          <div className="bg-emerald-50 text-emerald-600 p-2 rounded-lg">
+            <CheckCircle size={18} />
           </div>
         </div>
 
         {/* Belum Dilaporkan */}
-        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-amber-100 transition-all flex items-center justify-between print-card">
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase block">Belum Dilaporkan</span>
-            <span className="text-2xl font-extrabold text-amber-600 mt-1 block">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase block">Belum Lapor</span>
+            <span className="text-xl font-extrabold text-amber-600 mt-0.5 block">
               <AnimatedCounter value={stats.unreported} />
             </span>
           </div>
-          <div className="bg-amber-50 text-amber-600 p-2.5 rounded-lg no-print">
-            <AlertCircle size={20} />
+          <div className="bg-amber-50 text-amber-600 p-2 rounded-lg">
+            <AlertCircle size={18} />
           </div>
         </div>
 
         {/* Data Belum Lengkap */}
-        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md hover:border-rose-100 transition-all flex items-center justify-between print-card">
+        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold text-slate-400 uppercase block">Belum Lengkap</span>
-            <span className="text-2xl font-extrabold text-rose-600 mt-1 block">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase block">Belum Lengkap</span>
+            <span className="text-xl font-extrabold text-rose-600 mt-0.5 block">
               <AnimatedCounter value={stats.incomplete} />
             </span>
           </div>
-          <div className="bg-rose-50 text-rose-600 p-2.5 rounded-lg no-print">
-            <Info size={20} />
+          <div className="bg-rose-50 text-rose-600 p-2 rounded-lg">
+            <Info size={18} />
+          </div>
+        </div>
+
+        {/* Logistik Film Terpakai */}
+        <div className="bg-white p-4 rounded-xl border border-amber-100/80 shadow-sm flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-semibold text-amber-700 uppercase block">Pemakaian Film</span>
+            <span className="text-xl font-extrabold text-amber-900 mt-0.5 block">
+              <AnimatedCounter value={stats.totalFilmUsage || stats.total} /> <span className="text-xs font-medium text-slate-500">Lbr</span>
+            </span>
+          </div>
+          <div className="bg-amber-50 text-amber-600 p-2 rounded-lg">
+            🎞️
+          </div>
+        </div>
+
+        {/* Rata-rata Durasi Pelayanan */}
+        <div className="bg-white p-4 rounded-xl border border-blue-100/80 shadow-sm flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-semibold text-blue-700 uppercase block">Rerata Durasi</span>
+            <span className="text-xl font-extrabold text-blue-900 mt-0.5 block">
+              <AnimatedCounter value={stats.avgServiceDuration || 12} /> <span className="text-xs font-medium text-slate-500">Mnt</span>
+            </span>
+          </div>
+          <div className="bg-blue-50 text-blue-600 p-2 rounded-lg">
+            ⏱️
           </div>
         </div>
       </div>

@@ -189,6 +189,45 @@ try {
   db.exec("ALTER TABLE examinations ADD COLUMN queue_status TEXT DEFAULT 'Menunggu Tindakan'");
 } catch (e) {}
 
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN examination_type TEXT DEFAULT 'Radiografi Thoraks (Thorax PA)'");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN referring_doctor TEXT DEFAULT 'dr. Sp.P / Tim TB'");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN sending_unit TEXT DEFAULT 'Poli TB / Paru'");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN film_usage TEXT DEFAULT 'Film 35x43 cm (1 Lembar)'");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN exposure_params TEXT DEFAULT '115 kV, 4 mAs, FFD 180 cm'");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN service_duration INTEGER DEFAULT 12");
+} catch (e) {}
+
+// Fill default values for existing rows if null
+try {
+  db.exec(`
+    UPDATE examinations 
+    SET 
+      examination_type = COALESCE(examination_type, 'Radiografi Thoraks (Thorax PA)'),
+      referring_doctor = COALESCE(referring_doctor, 'dr. Sp.P / Tim TB'),
+      sending_unit = COALESCE(sending_unit, 'Poli TB / Paru'),
+      film_usage = COALESCE(film_usage, 'Film 35x43 cm (1 Lembar)'),
+      exposure_params = COALESCE(exposure_params, '115 kV, 4 mAs, FFD 180 cm'),
+      service_duration = COALESCE(service_duration, 12)
+    WHERE examination_type IS NULL OR referring_doctor IS NULL OR film_usage IS NULL
+  `);
+} catch (e) {}
+
 // Ensure institution user exists in existing database
 try {
   const checkInst = db.prepare("SELECT COUNT(*) as count FROM users WHERE username = 'institusi'").get();
