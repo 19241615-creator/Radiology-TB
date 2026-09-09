@@ -1071,10 +1071,20 @@ export default function ExaminationAddEdit() {
 
           {/* Form Actions Card */}
           <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-3">
+            {validationStatus && !validationStatus.isFullyValid && !ignoreMismatches && (
+              <div className="text-[11px] text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-center font-medium">
+                Centang kotak konfirmasi di atas untuk mengaktifkan tombol simpan.
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg text-sm shadow-md transition flex items-center justify-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
+              disabled={submitting || (validationStatus && !validationStatus.isFullyValid && !ignoreMismatches)}
+              className={`w-full font-semibold py-2.5 px-4 rounded-lg text-sm transition flex items-center justify-center gap-2 ${
+                validationStatus && !validationStatus.isFullyValid && !ignoreMismatches
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300 shadow-none'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-md cursor-pointer disabled:bg-blue-400 disabled:cursor-not-allowed'
+              }`}
             >
               {submitting ? (
                 <>
