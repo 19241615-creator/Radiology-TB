@@ -1071,12 +1071,6 @@ export default function ExaminationAddEdit() {
 
           {/* Form Actions Card */}
           <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-3">
-            {validationStatus && !validationStatus.isFullyValid && !ignoreMismatches && (
-              <div className="text-[11px] text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200 text-center font-medium">
-                Centang kotak konfirmasi di atas untuk mengaktifkan tombol simpan.
-              </div>
-            )}
-
             <button
               type="submit"
               disabled={submitting || (validationStatus && !validationStatus.isFullyValid && !ignoreMismatches)}
