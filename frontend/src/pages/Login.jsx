@@ -119,21 +119,49 @@ export default function Login() {
           
           {/* Central Logo Circle */}
           <div className="w-16 h-16 rounded-full overflow-hidden mx-auto shadow-lg border border-slate-100 bg-white">
-            <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover" />
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </div>
 
           <h2 className="text-2xl font-bold text-slate-800 text-center mt-5">Welcome Back!</h2>
           <p className="text-slate-400 text-xs text-center mt-1">Silakan masuk untuk mengakses sistem.</p>
 
+          {/* Quick Account Fill Buttons for Demo */}
+          <div className="mt-4 p-2.5 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-col gap-1.5">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Pilih Akun Pengguna</div>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => { setUsername('admin'); setPassword('admin123'); }}
+                className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer text-center"
+              >
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('radiographer'); setPassword('radio123'); }}
+                className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer text-center"
+              >
+                Radiografer
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('institusi'); setPassword('institusi123'); }}
+                className="px-2 py-1.5 bg-white hover:bg-blue-50 border border-slate-200 text-slate-700 hover:text-blue-700 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer text-center"
+              >
+                Institusi
+              </button>
+            </div>
+          </div>
+
           {error && (
-            <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3 mt-5">
+            <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3 mt-4">
               <AlertCircle className="text-rose-500 shrink-0 mt-0.5" size={18} />
               <div className="text-xs text-rose-800 font-semibold">{error}</div>
             </div>
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             
             {/* Username Field */}
             <div>

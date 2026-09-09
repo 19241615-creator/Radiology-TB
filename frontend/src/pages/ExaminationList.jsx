@@ -138,9 +138,20 @@ export default function ExaminationList() {
       case 'Sudah Dilaporkan':
         return <span className="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-full">Sudah Dilaporkan</span>;
       case 'Data Belum Lengkap':
-        return <span className="px-2 py-1 text-xs font-semibold bg-rose-100 text-rose-800 rounded-full">Data Belum Lengkap</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold bg-rose-100 text-rose-800 rounded-full">Data Belum Lengkap</span>;
       default:
-        return <span className="px-2 py-1 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">Belum Dilaporkan</span>;
+        return <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 rounded-full">Belum Dilaporkan</span>;
+    }
+  };
+
+  const getQueueBadge = (status) => {
+    switch (status) {
+      case 'Selesai':
+        return <span className="px-2 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg">✅ Selesai</span>;
+      case 'Sedang Diperiksa':
+        return <span className="px-2 py-0.5 text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">🔬 Sedang Diperiksa</span>;
+      default:
+        return <span className="px-2 py-0.5 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg">⏳ Menunggu Tindakan</span>;
     }
   };
 
@@ -149,17 +160,34 @@ export default function ExaminationList() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Data Pemeriksaan</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Kelola seluruh data pemeriksaan radiologi pasien TB.</p>
+          <h2 className="text-2xl font-bold text-slate-800">
+            {role === 'institution' ? 'Pemantauan Antrean Pasien' : 'Data Pemeriksaan & Registrasi'}
+          </h2>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {role === 'institution' 
+              ? 'Monitoring daftar antrean pasien dan rekapitulasi skrining TB secara terintegrasi.' 
+              : 'Kelola seluruh pencatatan registrasi dan pemeriksaan radiologi pasien TB.'}
+          </p>
         </div>
-        <Link
-          to="/examinations/add"
-          className="flex items-center gap-2 bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed font-bold py-2 px-4 rounded-lg text-sm border border-secondary-fixed shadow-md transition"
-        >
-          <Plus size={16} />
-          <span>Tambah Pemeriksaan</span>
-        </Link>
+        {role !== 'institution' && (
+          <Link
+            to="/examinations/add"
+            className="flex items-center gap-2 bg-secondary-fixed hover:bg-secondary-fixed-dim text-on-secondary-fixed font-bold py-2 px-4 rounded-lg text-sm border border-secondary-fixed shadow-md transition cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>{role === 'admin' ? 'Registrasi Pasien Baru' : 'Tambah Pemeriksaan'}</span>
+          </Link>
+        )}
       </div>
+
+      {role === 'institution' && (
+        <div className="bg-purple-50/80 border border-purple-200 text-purple-900 p-4 rounded-xl flex items-center gap-3">
+          <Info size={20} className="text-purple-600 shrink-0" />
+          <span className="text-xs font-medium leading-relaxed">
+            <strong>Mode Pemantauan Institusi:</strong> Anda dapat memantau progres antrean tindakan radiografer, status kesiapan pasien, dan melihat rekapitulasi berkas pemeriksaan secara terintegrasi.
+          </span>
+        </div>
+      )}
 
       {successMsg && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-lg flex items-center gap-3">
@@ -185,7 +213,7 @@ export default function ExaminationList() {
             </div>
             <input
               type="text"
-              placeholder="Cari ID Pasien, Nama Pasien, atau No Rekam Medis..."
+              placeholder="Cari ID Pasien, Nama Pasien, No Rekam Medis, atau No Telepon..."
               value={search}
               onChange={(e) => {
                 setSearchParams(prev => {
@@ -203,7 +231,7 @@ export default function ExaminationList() {
 
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition shadow-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg text-sm transition shadow-sm cursor-pointer"
           >
             Cari
           </button>
@@ -283,7 +311,7 @@ export default function ExaminationList() {
           <button
             type="button"
             onClick={handleResetFilters}
-            className="text-xs text-slate-500 hover:text-blue-600 font-semibold transition"
+            className="text-xs text-slate-500 hover:text-blue-600 font-semibold transition cursor-pointer"
           >
             Reset Filter & Pencarian
           </button>
@@ -307,50 +335,71 @@ export default function ExaminationList() {
             <table className="min-w-full divide-y divide-slate-100">
               <thead className="bg-slate-50">
                 <tr>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-16">No</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">ID Pasien</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Pasien</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Hasil/Diagnosa</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Radiografer</th>
-                  <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status Lapor</th>
-                  <th scope="col" className="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-36">Aksi</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-12">No</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">ID Pasien</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Identitas & Kontak</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Antrean Tindakan</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Hasil/Diagnosa</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Radiografer</th>
+                  <th scope="col" className="px-5 py-3.5 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status Lapor</th>
+                  <th scope="col" className="px-5 py-3.5 text-center text-xs font-bold text-slate-500 uppercase tracking-wider w-32">Aksi</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-100 text-sm text-slate-700">
                 {examinations.map((exam, idx) => (
                   <tr key={exam.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-400">
+                    <td className="px-5 py-4 whitespace-nowrap font-medium text-slate-400">
                       {(currentPage - 1) * limit + idx + 1}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-900">{exam.patient_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-5 py-4 whitespace-nowrap font-bold text-blue-900">{exam.patient_id}</td>
+                    <td className="px-5 py-4 whitespace-nowrap">
                       <div>
-                        <p className="font-semibold text-slate-900">{exam.patient_name}</p>
-                        <p className="text-xs text-slate-400">Usia: {exam.age} th | RM: {exam.medical_record_number}</p>
+                        <p className="font-bold text-slate-900">{exam.patient_name}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-0.5">
+                          <span>RM: <strong className="text-slate-700">{exam.medical_record_number}</strong></span>
+                          <span>•</span>
+                          <span>Usia: {exam.age} th ({exam.gender})</span>
+                          {exam.phone_number && (
+                            <>
+                              <span>•</span>
+                              <span className="text-blue-600 font-medium">📞 {exam.phone_number}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-slate-500">{exam.examination_date}</td>
-                    <td className="px-6 py-4 max-w-xs truncate" title={exam.diagnosis}>{exam.diagnosis}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-slate-500">{exam.radiographer_name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(exam.reporting_status)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-medium">
-                      <div className="flex items-center justify-center gap-2">
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        {getQueueBadge(exam.queue_status)}
+                        {exam.pre_action_checklist?.id_confirmed && (
+                          <div className="text-[10px] text-emerald-700 font-semibold flex items-center gap-0.5">
+                            ✓ SOP Tindakan Lengkap
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-xs text-slate-600 font-medium">{exam.examination_date}</td>
+                    <td className="px-5 py-4 max-w-xs truncate text-xs" title={exam.diagnosis}>{exam.diagnosis}</td>
+                    <td className="px-5 py-4 whitespace-nowrap text-xs text-slate-600">{exam.radiographer_name}</td>
+                    <td className="px-5 py-4 whitespace-nowrap">{getStatusBadge(exam.reporting_status)}</td>
+                    <td className="px-5 py-4 whitespace-nowrap text-center text-xs font-medium">
+                      <div className="flex items-center justify-center gap-1.5">
                         {/* View details */}
                         <Link
                           to={`/examinations/detail/${exam.id}`}
                           className="p-1.5 bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-                          title="Lihat Detail"
+                          title="Lihat Detail & Cetak"
                         >
                           <Eye size={16} />
                         </Link>
 
-                        {/* Edit data */}
-                        {(role === 'admin' || exam.radiographer_name === user.name) && (
+                        {/* Edit data (Admin & Radiographer only) */}
+                        {role !== 'institution' && (role === 'admin' || exam.radiographer_name === user.name) && (
                           <Link
                             to={`/examinations/edit/${exam.id}`}
                             className="p-1.5 bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-600 rounded-lg transition"
-                            title="Ubah Pemeriksaan"
+                            title="Ubah Pemeriksaan / Tindakan"
                           >
                             <Edit2 size={16} />
                           </Link>
@@ -360,7 +409,7 @@ export default function ExaminationList() {
                         {role === 'admin' && (
                           <button
                             onClick={() => handleDeleteClick(exam)}
-                            className="p-1.5 bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition"
+                            className="p-1.5 bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition cursor-pointer"
                             title="Hapus Pemeriksaan"
                           >
                             <Trash2 size={16} />

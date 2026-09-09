@@ -15,8 +15,9 @@ db.exec(`
     username TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL CHECK(role IN ('admin', 'radiographer')),
+    role TEXT NOT NULL CHECK(role IN ('admin', 'radiographer', 'institution')),
     status TEXT NOT NULL CHECK(status IN ('active', 'inactive')) DEFAULT 'active',
+    profile_pic TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -25,6 +26,7 @@ db.exec(`
     patient_id TEXT UNIQUE NOT NULL,
     patient_name TEXT NOT NULL,
     medical_record_number TEXT NOT NULL,
+    phone_number TEXT,
     age INTEGER NOT NULL,
     gender TEXT NOT NULL CHECK(gender IN ('L', 'P')),
     fasyankes_origin TEXT NOT NULL,
@@ -38,6 +40,9 @@ db.exec(`
     dicom_filesize INTEGER,
     dicom_metadata TEXT, -- JSON String
     validation_status TEXT, -- JSON String
+    pre_action_checklist TEXT, -- JSON String
+    post_action_checklist TEXT, -- JSON String
+    queue_status TEXT CHECK(queue_status IN ('Menunggu Tindakan', 'Sedang Diperiksa', 'Selesai')) DEFAULT 'Menunggu Tindakan',
     reporting_status TEXT NOT NULL CHECK(reporting_status IN ('Belum Dilaporkan', 'Data Belum Lengkap', 'Sudah Dilaporkan')) DEFAULT 'Belum Dilaporkan',
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -74,17 +79,23 @@ function seedDatabase() {
     const radiographerPasswordHash = bcrypt.hashSync('radio123', 10);
     insertUserStmt.run('Medioker Radiografer', 'radiographer', 'radiographer@tb-radiology.id', radiographerPasswordHash, 'radiographer', 'active');
 
+    // Institution user: institusi / institusi123
+    const institutionPasswordHash = bcrypt.hashSync('institusi123', 10);
+    insertUserStmt.run('Pimpinan Institusi & Faskes', 'institusi', 'institusi@tb-radiology.id', institutionPasswordHash, 'institution', 'active');
+
     console.log('Default users created:');
     console.log('- Admin: username "admin", password "admin123"');
     console.log('- Radiographer: username "radiographer", password "radio123"');
+    console.log('- Institution: username "institusi", password "institusi123"');
 
     // Insert dummy examinations for dashboard graphs
     const insertExamStmt = db.prepare(`
       INSERT INTO examinations (
-        patient_id, patient_name, medical_record_number, age, gender, fasyankes_origin,
+        patient_id, patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
         examination_date, diagnosis, risk_category, follow_up_status, radiographer_name,
-        reporting_status, dicom_filename, dicom_filesize, dicom_metadata, validation_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        reporting_status, queue_status, pre_action_checklist, post_action_checklist,
+        dicom_filename, dicom_filesize, dicom_metadata, validation_status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const dateToday = new Date().toISOString().split('T')[0];
@@ -106,22 +117,39 @@ function seedDatabase() {
       isFullyValid: true
     });
 
+    const defaultPreChecklist = JSON.stringify({
+      id_confirmed: true,
+      procedure_explained: true,
+      metal_removed: true,
+      pregnancy_screened: true
+    });
+
+    const defaultPostChecklist = JSON.stringify({
+      image_quality_optimal: true,
+      inspiration_adequate: true,
+      no_motion_artifact: true,
+      patient_stable: true
+    });
+
     insertExamStmt.run(
-      'P001', 'Budi Santoso', 'MRN-2026-001', 45, 'L', 'Puskesmas Gambir',
+      'P001', 'Budi Santoso', 'MRN-2026-001', '081234567890', 45, 'L', 'Puskesmas Gambir',
       dateLastWeek, 'TB Positif, infiltrat di apeks paru kanan', 'Tinggi', 'Dirujuk TCM', 'Medioker Radiografer',
-      'Sudah Dilaporkan', 'dummy_budi.dcm', 5242880, defaultDicomMeta, defaultValStatus
+      'Sudah Dilaporkan', 'Selesai', defaultPreChecklist, defaultPostChecklist,
+      'dummy_budi.dcm', 5242880, defaultDicomMeta, defaultValStatus
     );
 
     insertExamStmt.run(
-      'P002', 'Siti Rahma', 'MRN-2026-002', 32, 'P', 'Puskesmas Menteng',
+      'P002', 'Siti Rahma', 'MRN-2026-002', '085712345678', 32, 'P', 'Puskesmas Menteng',
       dateYesterday, 'Bercak fibrosis, suspect TB lama', 'Sedang', 'Pemeriksaan Lanjutan', 'Medioker Radiografer',
-      'Belum Dilaporkan', 'dummy_siti.dcm', 5242880, defaultDicomMeta, defaultValStatus
+      'Belum Dilaporkan', 'Sedang Diperiksa', defaultPreChecklist, defaultPostChecklist,
+      'dummy_siti.dcm', 5242880, defaultDicomMeta, defaultValStatus
     );
 
     insertExamStmt.run(
-      'P003', 'Andi Wijaya', 'MRN-2026-003', 28, 'L', 'Puskesmas Senen',
+      'P003', 'Andi Wijaya', 'MRN-2026-003', '087898765432', 28, 'L', 'Puskesmas Senen',
       dateToday, 'Radiografi Thorax Normal', 'Rendah', 'Tidak Ada Tindak Lanjut', 'Medioker Radiografer',
-      'Data Belum Lengkap', null, null, null, null
+      'Data Belum Lengkap', 'Menunggu Tindakan', defaultPreChecklist, defaultPostChecklist,
+      null, null, null, null
     );
 
     // Seed audit logs
@@ -140,10 +168,40 @@ function seedDatabase() {
 
 seedDatabase();
 
+// Apply migrations to existing tables safely
 try {
   db.exec("ALTER TABLE users ADD COLUMN profile_pic TEXT");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN phone_number TEXT");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN pre_action_checklist TEXT");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN post_action_checklist TEXT");
+} catch (e) {}
+
+try {
+  db.exec("ALTER TABLE examinations ADD COLUMN queue_status TEXT DEFAULT 'Menunggu Tindakan'");
+} catch (e) {}
+
+// Ensure institution user exists in existing database
+try {
+  const checkInst = db.prepare("SELECT COUNT(*) as count FROM users WHERE username = 'institusi'").get();
+  if (checkInst.count === 0) {
+    const instPass = bcrypt.hashSync('institusi123', 10);
+    db.prepare(`
+      INSERT INTO users (name, username, email, password, role, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run('Pimpinan Institusi & Faskes', 'institusi', 'institusi@tb-radiology.id', instPass, 'institution', 'active');
+    console.log('Default institution user created: username "institusi", password "institusi123"');
+  }
 } catch (e) {
-  // Column already exists, ignore
+  console.error('Error ensuring institution user:', e);
 }
 
 module.exports = db;

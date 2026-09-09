@@ -354,11 +354,17 @@ export default function UserManagement() {
                     <td className="px-6 py-4 whitespace-nowrap">{u.username}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{u.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap capitalize">
-                      {u.role === 'admin' ? (
+                      {u.role === 'admin' && (
                         <span className="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-semibold text-xs border border-blue-100">
-                          <Shield size={12} /> Admin
+                          <Shield size={12} /> Administrasi
                         </span>
-                      ) : (
+                      )}
+                      {u.role === 'institution' && (
+                        <span className="inline-flex items-center gap-1 text-purple-700 bg-purple-50 px-2 py-0.5 rounded font-semibold text-xs border border-purple-200">
+                          <ShieldAlert size={12} /> Institusi
+                        </span>
+                      )}
+                      {u.role === 'radiographer' && (
                         <span className="inline-flex items-center gap-1 text-slate-700 bg-slate-100 px-2 py-0.5 rounded font-semibold text-xs">
                           Radiografer
                         </span>
@@ -494,8 +500,9 @@ export default function UserManagement() {
                     onChange={(e) => setRole(e.target.value)}
                     className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   >
-                    <option value="radiographer">Medioker / Radiografer</option>
-                    <option value="admin">Administrator</option>
+                    <option value="radiographer">Radiografer</option>
+                    <option value="admin">Administrasi (Admin)</option>
+                    <option value="institution">Institusi / Pimpinan Faskes</option>
                   </select>
                 </div>
 

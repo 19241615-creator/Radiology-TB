@@ -25,6 +25,7 @@ export default function ExaminationAddEdit() {
     patient_id: '',
     patient_name: '',
     medical_record_number: '',
+    phone_number: '',
     age: '',
     gender: 'L',
     fasyankes_origin: '',
@@ -33,7 +34,23 @@ export default function ExaminationAddEdit() {
     risk_category: 'Rendah',
     follow_up_status: 'Tidak Ada Tindak Lanjut',
     additional_info: '',
+    queue_status: 'Menunggu Tindakan',
     reporting_status: 'Belum Dilaporkan'
+  });
+
+  // SOP Checklist State (Radiographer)
+  const [preChecklist, setPreChecklist] = useState({
+    id_confirmed: false,
+    procedure_explained: false,
+    metal_removed: false,
+    pregnancy_screened: false
+  });
+
+  const [postChecklist, setPostChecklist] = useState({
+    image_quality_optimal: false,
+    inspiration_adequate: false,
+    no_motion_artifact: false,
+    patient_stable: false
   });
 
   // DICOM Upload State
@@ -71,16 +88,25 @@ export default function ExaminationAddEdit() {
             patient_id: data.patient_id,
             patient_name: data.patient_name,
             medical_record_number: data.medical_record_number,
+            phone_number: data.phone_number || '',
             age: data.age,
             gender: data.gender,
             fasyankes_origin: data.fasyankes_origin,
             examination_date: data.examination_date,
-            diagnosis: data.diagnosis,
-            risk_category: data.risk_category,
-            follow_up_status: data.follow_up_status,
+            diagnosis: data.diagnosis || '',
+            risk_category: data.risk_category || 'Rendah',
+            follow_up_status: data.follow_up_status || 'Tidak Ada Tindak Lanjut',
             additional_info: data.additional_info || '',
-            reporting_status: data.reporting_status
+            queue_status: data.queue_status || 'Menunggu Tindakan',
+            reporting_status: data.reporting_status || 'Belum Dilaporkan'
           });
+
+          if (data.pre_action_checklist) {
+            setPreChecklist(data.pre_action_checklist);
+          }
+          if (data.post_action_checklist) {
+            setPostChecklist(data.post_action_checklist);
+          }
 
           if (data.dicom_filename) {
             setDicomFilename(data.dicom_filename);
@@ -296,7 +322,9 @@ export default function ExaminationAddEdit() {
       dicom_filename: dicomFilename,
       dicom_filesize: dicomFilesize,
       dicom_metadata: uploadedDicomMeta,
-      validation_status: validationStatus
+      validation_status: validationStatus,
+      pre_action_checklist: preChecklist,
+      post_action_checklist: postChecklist
     };
 
     try {
@@ -430,6 +458,19 @@ export default function ExaminationAddEdit() {
                 />
               </div>
 
+              {/* Phone Number / WhatsApp */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">No. Telepon / WhatsApp Pasien *</label>
+                <input
+                  type="tel"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleInputChange}
+                  placeholder="Contoh: 081234567890"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"
+                />
+              </div>
+
               {/* Age */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Usia Pasien *</label>
@@ -500,6 +541,21 @@ export default function ExaminationAddEdit() {
                 />
               </div>
 
+              {/* Status Antrean Pelayanan */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">Status Antrean Pelayanan *</label>
+                <select
+                  name="queue_status"
+                  value={formData.queue_status}
+                  onChange={handleInputChange}
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-white font-medium"
+                >
+                  <option value="Menunggu Tindakan">⏳ Menunggu Tindakan Radiografer</option>
+                  <option value="Sedang Diperiksa">🔬 Sedang Diperiksa</option>
+                  <option value="Selesai">✅ Selesai Diperiksa</option>
+                </select>
+              </div>
+
               {/* Status Pelaporan (Admin / Radiographer can set, defaults to Belum Dilaporkan) */}
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Status Pelaporan *</label>
@@ -507,12 +563,125 @@ export default function ExaminationAddEdit() {
                   name="reporting_status"
                   value={formData.reporting_status}
                   onChange={handleInputChange}
-                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-white"
+                  className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-white font-medium"
                 >
                   <option value="Belum Dilaporkan">Belum Dilaporkan</option>
                   <option value="Data Belum Lengkap">Data Belum Lengkap</option>
                   <option value="Sudah Dilaporkan">Sudah Dilaporkan</option>
                 </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Checklist Standar Operasional Radiografer (SOP Pelayanan Skrining TB) */}
+          <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Checklist Standar Operasional Radiografer</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Memastikan kesiapan pra-tindakan dan kendali mutu pasca-pemeriksaan radiografi.</p>
+              </div>
+              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 font-bold text-[11px] rounded-lg border border-blue-100">
+                SOP Radiologi
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
+              {/* Checklist Pra-Tindakan */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2.5">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 text-blue-900">
+                  <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                  1. Kesiapan Sebelum Tindakan (Pra)
+                </h4>
+                <div className="space-y-2 pt-1 text-xs text-slate-700">
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!preChecklist.id_confirmed}
+                      onChange={(e) => setPreChecklist(prev => ({ ...prev, id_confirmed: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>Konfirmasi Identitas Pasien (Nama, No. RM, Tgl Lahir)</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!preChecklist.procedure_explained}
+                      onChange={(e) => setPreChecklist(prev => ({ ...prev, procedure_explained: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>Penjelasan Prosedur Tindakan & Edukasi Posisi PA/AP</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!preChecklist.metal_removed}
+                      onChange={(e) => setPreChecklist(prev => ({ ...prev, metal_removed: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>Pelepasan Benda Logam / Kalung di Area Dada</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!preChecklist.pregnancy_screened}
+                      onChange={(e) => setPreChecklist(prev => ({ ...prev, pregnancy_screened: e.target.checked }))}
+                      className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>Skrining Status Kehamilan (Khusus Pasien Wanita)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Checklist Pasca-Pemeriksaan */}
+              <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200/80 space-y-2.5">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 text-emerald-900">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                  2. Kendali Mutu Pasca-Pemeriksaan
+                </h4>
+                <div className="space-y-2 pt-1 text-xs text-slate-700">
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!postChecklist.image_quality_optimal}
+                      onChange={(e) => setPostChecklist(prev => ({ ...prev, image_quality_optimal: e.target.checked }))}
+                      className="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span>Kualitas Citra Optimal & Lapang Paru Simetris</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!postChecklist.inspiration_adequate}
+                      onChange={(e) => setPostChecklist(prev => ({ ...prev, inspiration_adequate: e.target.checked }))}
+                      className="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span>Inspirasi Maksimal (Costa Posterior ke-10 Terlihat)</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!postChecklist.no_motion_artifact}
+                      onChange={(e) => setPostChecklist(prev => ({ ...prev, no_motion_artifact: e.target.checked }))}
+                      className="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span>Bebas Artefak Gerakan (Citra Tajam / Tidak Goyang)</span>
+                  </label>
+
+                  <label className="flex items-start gap-2.5 cursor-pointer hover:text-slate-900">
+                    <input 
+                      type="checkbox"
+                      checked={!!postChecklist.patient_stable}
+                      onChange={(e) => setPostChecklist(prev => ({ ...prev, patient_stable: e.target.checked }))}
+                      className="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span>Kondisi Umum Pasien Pasca-Tindakan Aman & Stabil</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

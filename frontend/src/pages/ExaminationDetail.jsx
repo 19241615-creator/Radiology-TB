@@ -130,7 +130,7 @@ export default function ExaminationDetail() {
         <div className="lg:col-span-2 space-y-6">
           {/* Patient Profile Card */}
           <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3">Identitas Pasien</h3>
+            <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-3">Identitas & Kontak Pasien</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-4 gap-x-6 text-sm">
               <div>
                 <span className="text-xs text-slate-400 block font-medium">Nama Pasien</span>
@@ -138,16 +138,30 @@ export default function ExaminationDetail() {
               </div>
               <div>
                 <span className="text-xs text-slate-400 block font-medium">ID Pasien</span>
-                <span className="font-semibold text-slate-900 mt-0.5 block">{exam.patient_id}</span>
+                <span className="font-bold text-blue-900 mt-0.5 block">{exam.patient_id}</span>
               </div>
               <div>
                 <span className="text-xs text-slate-400 block font-medium">No. Rekam Medis (MRN)</span>
                 <span className="font-semibold text-slate-900 mt-0.5 block">{exam.medical_record_number}</span>
               </div>
               <div>
+                <span className="text-xs text-slate-400 block font-medium">No. Telepon / WhatsApp</span>
+                <span className="font-semibold text-blue-600 mt-0.5 block">
+                  {exam.phone_number ? `📞 ${exam.phone_number}` : <span className="text-slate-400 italic">—</span>}
+                </span>
+              </div>
+              <div>
                 <span className="text-xs text-slate-400 block font-medium">Usia / Jenis Kelamin</span>
                 <span className="font-semibold text-slate-900 mt-0.5 block">
                   {exam.age} Tahun | {exam.gender === 'L' ? 'Laki-laki' : 'Perempuan'}
+                </span>
+              </div>
+              <div>
+                <span className="text-xs text-slate-400 block font-medium">Status Antrean Pelayanan</span>
+                <span className="font-bold text-slate-800 mt-0.5 block">
+                  {exam.queue_status === 'Selesai' && <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-xs">✅ Selesai</span>}
+                  {exam.queue_status === 'Sedang Diperiksa' && <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">🔬 Sedang Diperiksa</span>}
+                  {(!exam.queue_status || exam.queue_status === 'Menunggu Tindakan') && <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs">⏳ Menunggu Tindakan</span>}
                 </span>
               </div>
               <div>
@@ -157,6 +171,103 @@ export default function ExaminationDetail() {
               <div>
                 <span className="text-xs text-slate-400 block font-medium">Tanggal Pemeriksaan</span>
                 <span className="font-semibold text-slate-900 mt-0.5 block">{exam.examination_date}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* SOP Radiographer Checklist Card */}
+          <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Checklist Standar Operasional Radiografer</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Verifikasi kesiapan sebelum tindakan dan kendali mutu pasca-pemeriksaan.</p>
+              </div>
+              <span className="px-2.5 py-1 bg-blue-50 text-blue-700 font-bold text-[11px] rounded-lg border border-blue-100">
+                SOP Radiologi
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Pra-Tindakan */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+                <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px] text-blue-900">
+                  1. Kesiapan Sebelum Tindakan (Pra)
+                </h4>
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className={exam.pre_action_checklist?.id_confirmed ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.pre_action_checklist?.id_confirmed ? '✓' : '○'}
+                    </span>
+                    <span className={exam.pre_action_checklist?.id_confirmed ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Konfirmasi Identitas Pasien
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={exam.pre_action_checklist?.procedure_explained ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.pre_action_checklist?.procedure_explained ? '✓' : '○'}
+                    </span>
+                    <span className={exam.pre_action_checklist?.procedure_explained ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Penjelasan Prosedur & Posisi PA/AP
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={exam.pre_action_checklist?.metal_removed ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.pre_action_checklist?.metal_removed ? '✓' : '○'}
+                    </span>
+                    <span className={exam.pre_action_checklist?.metal_removed ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Pelepasan Benda Logam Dada
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={exam.pre_action_checklist?.pregnancy_screened ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.pre_action_checklist?.pregnancy_screened ? '✓' : '○'}
+                    </span>
+                    <span className={exam.pre_action_checklist?.pregnancy_screened ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Skrining Status Kehamilan
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pasca-Pemeriksaan */}
+              <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200/80 space-y-2 text-xs">
+                <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px] text-emerald-900">
+                  2. Kendali Mutu Pasca-Pemeriksaan
+                </h4>
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className={exam.post_action_checklist?.image_quality_optimal ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.post_action_checklist?.image_quality_optimal ? '✓' : '○'}
+                    </span>
+                    <span className={exam.post_action_checklist?.image_quality_optimal ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Kualitas Citra Optimal & Lapang Paru Simetris
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={exam.post_action_checklist?.inspiration_adequate ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.post_action_checklist?.inspiration_adequate ? '✓' : '○'}
+                    </span>
+                    <span className={exam.post_action_checklist?.inspiration_adequate ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Inspirasi Maksimal (Costa ke-10)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={exam.post_action_checklist?.no_motion_artifact ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.post_action_checklist?.no_motion_artifact ? '✓' : '○'}
+                    </span>
+                    <span className={exam.post_action_checklist?.no_motion_artifact ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Bebas Artefak Gerakan (Tidak Goyang)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={exam.post_action_checklist?.patient_stable ? 'text-emerald-600 font-bold' : 'text-slate-300'}>
+                      {exam.post_action_checklist?.patient_stable ? '✓' : '○'}
+                    </span>
+                    <span className={exam.post_action_checklist?.patient_stable ? 'text-slate-800 font-medium' : 'text-slate-400'}>
+                      Kondisi Pasien Pasca-Tindakan Stabil
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

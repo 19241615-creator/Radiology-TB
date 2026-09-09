@@ -82,7 +82,7 @@ export default function App() {
         <Route 
           path="/reports" 
           element={
-            <PrivateRoute allowedRoles={['admin']}>
+            <PrivateRoute allowedRoles={['admin', 'institution']}>
               <Layout>
                 <Reporting />
               </Layout>

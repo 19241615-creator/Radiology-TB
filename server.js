@@ -420,7 +420,9 @@ app.get('/api/examinations', authenticateToken, (req, res) => {
     const formattedExams = examinations.map(exam => ({
       ...exam,
       dicom_metadata: exam.dicom_metadata ? JSON.parse(exam.dicom_metadata) : null,
-      validation_status: exam.validation_status ? JSON.parse(exam.validation_status) : null
+      validation_status: exam.validation_status ? JSON.parse(exam.validation_status) : null,
+      pre_action_checklist: exam.pre_action_checklist ? JSON.parse(exam.pre_action_checklist) : null,
+      post_action_checklist: exam.post_action_checklist ? JSON.parse(exam.post_action_checklist) : null
     }));
 
     res.json({
@@ -462,6 +464,8 @@ app.get('/api/examinations/:id', authenticateToken, (req, res) => {
       ...exam,
       dicom_metadata: exam.dicom_metadata ? JSON.parse(exam.dicom_metadata) : null,
       validation_status: exam.validation_status ? JSON.parse(exam.validation_status) : null,
+      pre_action_checklist: exam.pre_action_checklist ? JSON.parse(exam.pre_action_checklist) : null,
+      post_action_checklist: exam.post_action_checklist ? JSON.parse(exam.post_action_checklist) : null,
       history
     };
 
@@ -559,15 +563,16 @@ app.get('/api/examinations/check-id/:patientId', authenticateToken, (req, res) =
 });
 
 // Create new examination
-app.post('/api/examinations', authenticateToken, (req, res) => {
+app.post('/api/examinations', authenticateToken, authorizeRoles('admin', 'radiographer'), (req, res) => {
   const {
-    patient_id, patient_name, medical_record_number, age, gender, fasyankes_origin,
+    patient_id, patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
     examination_date, diagnosis, risk_category, follow_up_status, additional_info,
-    dicom_filename, dicom_filesize, dicom_metadata, validation_status, reporting_status
+    dicom_filename, dicom_filesize, dicom_metadata, validation_status,
+    pre_action_checklist, post_action_checklist, queue_status, reporting_status
   } = req.body;
 
-  if (!patient_id || !patient_name || !medical_record_number || !age || !gender || !fasyankes_origin || !examination_date || !diagnosis || !risk_category || !follow_up_status) {
-    return res.status(400).json({ message: 'Semua data pemeriksaan utama wajib diisi.' });
+  if (!patient_id || !patient_name || !medical_record_number || !age || !gender || !fasyankes_origin || !examination_date) {
+    return res.status(400).json({ message: 'Data identitas pasien wajib diisi secara lengkap.' });
   }
 
   try {
@@ -579,30 +584,35 @@ app.post('/api/examinations', authenticateToken, (req, res) => {
 
     const insertStmt = db.prepare(`
       INSERT INTO examinations (
-        patient_id, patient_name, medical_record_number, age, gender, fasyankes_origin,
+        patient_id, patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
         examination_date, diagnosis, risk_category, follow_up_status, radiographer_name, additional_info,
-        dicom_filename, dicom_filesize, dicom_metadata, validation_status, reporting_status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        dicom_filename, dicom_filesize, dicom_metadata, validation_status,
+        pre_action_checklist, post_action_checklist, queue_status, reporting_status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = insertStmt.run(
       patient_id,
       patient_name,
       medical_record_number,
+      phone_number || null,
       parseInt(age),
       gender,
       fasyankes_origin,
       examination_date,
-      diagnosis,
-      risk_category,
-      follow_up_status,
+      diagnosis || 'Menunggu Tindakan Radiografer',
+      risk_category || 'Rendah',
+      follow_up_status || 'Tidak Ada Tindak Lanjut',
       req.user.name,
       additional_info || null,
       dicom_filename || null,
       dicom_filesize ? parseInt(dicom_filesize) : null,
       dicom_metadata ? JSON.stringify(dicom_metadata) : null,
       validation_status ? JSON.stringify(validation_status) : null,
-      reporting_status || 'Belum Dilaporkan'
+      pre_action_checklist ? JSON.stringify(pre_action_checklist) : null,
+      post_action_checklist ? JSON.stringify(post_action_checklist) : null,
+      queue_status || (dicom_filename ? 'Selesai' : 'Menunggu Tindakan'),
+      reporting_status || (dicom_filename ? 'Sudah Dilaporkan' : 'Belum Dilaporkan')
     );
 
     logActivity(
@@ -624,12 +634,13 @@ app.post('/api/examinations', authenticateToken, (req, res) => {
 });
 
 // Update examination
-app.put('/api/examinations/:id', authenticateToken, (req, res) => {
+app.put('/api/examinations/:id', authenticateToken, authorizeRoles('admin', 'radiographer'), (req, res) => {
   const examId = req.params.id;
   const {
-    patient_name, medical_record_number, age, gender, fasyankes_origin,
+    patient_name, medical_record_number, phone_number, age, gender, fasyankes_origin,
     examination_date, diagnosis, risk_category, follow_up_status, additional_info,
-    dicom_filename, dicom_filesize, dicom_metadata, validation_status, reporting_status
+    dicom_filename, dicom_filesize, dicom_metadata, validation_status,
+    pre_action_checklist, post_action_checklist, queue_status, reporting_status
   } = req.body;
 
   try {
@@ -640,15 +651,13 @@ app.put('/api/examinations/:id', authenticateToken, (req, res) => {
       return res.status(404).json({ message: 'Data pemeriksaan tidak ditemukan.' });
     }
 
-    // Role verification (if radiographer, check if they can edit - radiographers can edit their own)
-    if (req.user.role === 'radiographer' && exam.radiographer_name !== req.user.name) {
-      return res.status(403).json({ message: 'Anda hanya diperbolehkan mengedit data pemeriksaan yang Anda buat sendiri.' });
-    }
     const updateStmt = db.prepare(`
       UPDATE examinations
-      SET patient_name = ?, medical_record_number = ?, age = ?, gender = ?, fasyankes_origin = ?,
+      SET patient_name = ?, medical_record_number = ?, phone_number = ?, age = ?, gender = ?, fasyankes_origin = ?,
           examination_date = ?, diagnosis = ?, risk_category = ?, follow_up_status = ?, additional_info = ?,
-          dicom_filename = ?, dicom_filesize = ?, dicom_metadata = ?, validation_status = ?, reporting_status = ?,
+          dicom_filename = ?, dicom_filesize = ?, dicom_metadata = ?, validation_status = ?,
+          pre_action_checklist = ?, post_action_checklist = ?, queue_status = ?, reporting_status = ?,
+          radiographer_name = CASE WHEN ? = 'radiographer' THEN ? ELSE radiographer_name END,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
@@ -656,6 +665,7 @@ app.put('/api/examinations/:id', authenticateToken, (req, res) => {
     updateStmt.run(
       patient_name,
       medical_record_number,
+      phone_number || null,
       parseInt(age),
       gender,
       fasyankes_origin,
@@ -664,11 +674,16 @@ app.put('/api/examinations/:id', authenticateToken, (req, res) => {
       risk_category,
       follow_up_status,
       additional_info || null,
-      dicom_filename || null,
-      dicom_filesize ? parseInt(dicom_filesize) : null,
-      dicom_metadata ? JSON.stringify(dicom_metadata) : null,
-      validation_status ? JSON.stringify(validation_status) : null,
-      reporting_status,
+      dicom_filename !== undefined ? dicom_filename : exam.dicom_filename,
+      dicom_filesize !== undefined ? (dicom_filesize ? parseInt(dicom_filesize) : null) : exam.dicom_filesize,
+      dicom_metadata !== undefined ? (dicom_metadata ? JSON.stringify(dicom_metadata) : null) : exam.dicom_metadata,
+      validation_status !== undefined ? (validation_status ? JSON.stringify(validation_status) : null) : exam.validation_status,
+      pre_action_checklist !== undefined ? (pre_action_checklist ? JSON.stringify(pre_action_checklist) : null) : exam.pre_action_checklist,
+      post_action_checklist !== undefined ? (post_action_checklist ? JSON.stringify(post_action_checklist) : null) : exam.post_action_checklist,
+      queue_status || exam.queue_status,
+      reporting_status || exam.reporting_status,
+      req.user.role,
+      req.user.name,
       examId
     );
 

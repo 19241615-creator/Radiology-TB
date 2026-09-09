@@ -211,7 +211,33 @@ export default function Layout({ children }) {
     }
   ];
 
-  const menuItems = role === 'admin' ? adminMenu : radiographerMenu;
+  const institutionMenu = [
+    {
+      title: 'Dashboard',
+      path: '/',
+      icon: 'dashboard'
+    },
+    {
+      title: 'Pemantauan Antrean',
+      path: '/examinations',
+      icon: 'clinical_notes'
+    },
+    {
+      title: 'Laporan & Rekapitulasi',
+      path: '/reports',
+      icon: 'description'
+    },
+    {
+      title: 'Profile',
+      path: '/profile',
+      icon: 'person',
+      isBottom: true
+    }
+  ];
+
+  const menuItems = role === 'admin' 
+    ? adminMenu 
+    : (role === 'institution' ? institutionMenu : radiographerMenu);
   const topMenuItems = menuItems.filter(item => !item.isBottom);
   const bottomMenuItems = menuItems.filter(item => item.isBottom);
 
@@ -220,7 +246,9 @@ export default function Layout({ children }) {
     ? user.name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() 
     : 'U';
 
-  const userRoleText = role === 'admin' ? 'Admin' : 'Radiografer';
+  const userRoleText = role === 'admin' 
+    ? 'Administrasi' 
+    : (role === 'institution' ? 'Institusi' : 'Radiografer');
 
   const notificationCount = (topbarData.highRiskUnreported > 0 ? 1 : 0) + 
                             (topbarData.incompleteCount > 0 ? 1 : 0) + 
