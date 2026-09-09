@@ -368,6 +368,8 @@ export default function Reporting() {
                   <th scope="col" className="px-4 py-3 text-left">Usia</th>
                   <th scope="col" className="px-4 py-3 text-left">Puskesmas Perujuk</th>
                   <th scope="col" className="px-4 py-3 text-left">Tanggal</th>
+                  <th scope="col" className="px-4 py-3 text-left">Pemakaian Film</th>
+                  <th scope="col" className="px-4 py-3 text-left">Durasi</th>
                   <th scope="col" className="px-4 py-3 text-left">Kategori Risiko</th>
                   <th scope="col" className="px-4 py-3 text-left">Tindak Lanjut</th>
                   <th scope="col" className="px-4 py-3 text-left">Status Lapor</th>
@@ -387,6 +389,16 @@ export default function Reporting() {
                     <td className="px-4 py-3">{rec.age} th</td>
                     <td className="px-4 py-3">{rec.fasyankes_origin}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{rec.examination_date}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-amber-900">
+                      <span className="bg-amber-50 px-2 py-1 rounded border border-amber-200/80">
+                        🎞️ {rec.film_usage || 'Film 35x43 cm (1 Lbr)'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-blue-800">
+                      <span className="bg-blue-50 px-2 py-1 rounded border border-blue-200/80">
+                        ⏱️ {rec.service_duration || 12} Mnt
+                      </span>
+                    </td>
                     <td className="px-4 py-3 font-medium">{rec.risk_category}</td>
                     <td className="px-4 py-3 text-xs">{rec.follow_up_status}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
