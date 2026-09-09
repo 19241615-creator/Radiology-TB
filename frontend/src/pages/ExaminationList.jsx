@@ -147,11 +147,11 @@ export default function ExaminationList() {
   const getQueueBadge = (status) => {
     switch (status) {
       case 'Selesai':
-        return <span className="px-2 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg">✅ Selesai</span>;
+        return <span className="px-2 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg">Selesai</span>;
       case 'Sedang Diperiksa':
-        return <span className="px-2 py-0.5 text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">🔬 Sedang Diperiksa</span>;
+        return <span className="px-2 py-0.5 text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">Sedang Diperiksa</span>;
       default:
-        return <span className="px-2 py-0.5 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg">⏳ Menunggu Tindakan</span>;
+        return <span className="px-2 py-0.5 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg">Menunggu Tindakan</span>;
     }
   };
 
@@ -363,7 +363,7 @@ export default function ExaminationList() {
                           {exam.phone_number && (
                             <>
                               <span>•</span>
-                              <span className="text-blue-600 font-medium">📞 {exam.phone_number}</span>
+                              <span className="text-blue-600 font-medium">Telp: {exam.phone_number}</span>
                             </>
                           )}
                         </div>

@@ -8,7 +8,9 @@ import {
   AlertCircle,
   Database,
   CheckCircle,
-  Info
+  Info,
+  Film,
+  Clock
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -252,8 +254,8 @@ export default function Reporting() {
               <AnimatedCounter value={stats.totalFilmUsage || stats.total} /> <span className="text-xs font-medium text-slate-500">Lbr</span>
             </span>
           </div>
-          <div className="bg-amber-50 text-amber-600 p-2 rounded-lg">
-            🎞️
+          <div className="bg-amber-50 text-amber-700 p-2 rounded-lg">
+            <Film size={18} />
           </div>
         </div>
 
@@ -265,8 +267,8 @@ export default function Reporting() {
               <AnimatedCounter value={stats.avgServiceDuration || 12} /> <span className="text-xs font-medium text-slate-500">Mnt</span>
             </span>
           </div>
-          <div className="bg-blue-50 text-blue-600 p-2 rounded-lg">
-            ⏱️
+          <div className="bg-blue-50 text-blue-700 p-2 rounded-lg">
+            <Clock size={18} />
           </div>
         </div>
       </div>
@@ -390,13 +392,13 @@ export default function Reporting() {
                     <td className="px-4 py-3">{rec.fasyankes_origin}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{rec.examination_date}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-amber-900">
-                      <span className="bg-amber-50 px-2 py-1 rounded border border-amber-200/80">
-                        🎞️ {rec.film_usage || 'Film 35x43 cm (1 Lbr)'}
+                      <span className="bg-amber-50 px-2.5 py-1 rounded border border-amber-200/80">
+                        {rec.film_usage || 'Film 35x43 cm (1 Lembar)'}
                       </span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-xs font-semibold text-blue-800">
-                      <span className="bg-blue-50 px-2 py-1 rounded border border-blue-200/80">
-                        ⏱️ {rec.service_duration || 12} Mnt
+                      <span className="bg-blue-50 px-2.5 py-1 rounded border border-blue-200/80">
+                        {rec.service_duration || 12} Menit
                       </span>
                     </td>
                     <td className="px-4 py-3 font-medium">{rec.risk_category}</td>

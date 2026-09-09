@@ -147,7 +147,7 @@ export default function ExaminationDetail() {
               <div>
                 <span className="text-xs text-slate-400 block font-medium">No. Telepon / WhatsApp</span>
                 <span className="font-semibold text-blue-600 mt-0.5 block">
-                  {exam.phone_number ? `📞 ${exam.phone_number}` : <span className="text-slate-400 italic">—</span>}
+                  {exam.phone_number || <span className="text-slate-400 italic">—</span>}
                 </span>
               </div>
               <div>
@@ -159,9 +159,9 @@ export default function ExaminationDetail() {
               <div>
                 <span className="text-xs text-slate-400 block font-medium">Status Antrean Pelayanan</span>
                 <span className="font-bold text-slate-800 mt-0.5 block">
-                  {exam.queue_status === 'Selesai' && <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-xs">✅ Selesai</span>}
-                  {exam.queue_status === 'Sedang Diperiksa' && <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">🔬 Sedang Diperiksa</span>}
-                  {(!exam.queue_status || exam.queue_status === 'Menunggu Tindakan') && <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs">⏳ Menunggu Tindakan</span>}
+                  {exam.queue_status === 'Selesai' && <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-xs">Selesai</span>}
+                  {exam.queue_status === 'Sedang Diperiksa' && <span className="text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 text-xs">Sedang Diperiksa</span>}
+                  {(!exam.queue_status || exam.queue_status === 'Menunggu Tindakan') && <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-xs">Menunggu Tindakan</span>}
                 </span>
               </div>
               <div>
@@ -202,15 +202,15 @@ export default function ExaminationDetail() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                 <span className="text-xs text-slate-400 block font-medium">Pemakaian Logistik / Film</span>
-                <span className="font-bold text-slate-800 mt-1 block">🎞️ {exam.film_usage || 'Film 35x43 cm (1 Lembar)'}</span>
+                <span className="font-bold text-slate-800 mt-1 block">{exam.film_usage || 'Film 35x43 cm (1 Lembar)'}</span>
               </div>
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                 <span className="text-xs text-slate-400 block font-medium">Parameter Eksposi (kV / mAs / FFD)</span>
-                <span className="font-bold text-slate-800 mt-1 block">⚡ {exam.exposure_params || '115 kV, 4 mAs, FFD 180 cm'}</span>
+                <span className="font-bold text-slate-800 mt-1 block">{exam.exposure_params || '115 kV, 4 mAs, FFD 180 cm'}</span>
               </div>
               <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                 <span className="text-xs text-slate-400 block font-medium">Durasi Waktu Pelayanan</span>
-                <span className="font-bold text-blue-700 mt-1 block">⏱️ {exam.service_duration || 12} Menit</span>
+                <span className="font-bold text-blue-700 mt-1 block">{exam.service_duration || 12} Menit</span>
               </div>
             </div>
           </div>

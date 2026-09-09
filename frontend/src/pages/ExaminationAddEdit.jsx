@@ -603,9 +603,9 @@ export default function ExaminationAddEdit() {
                   onChange={handleInputChange}
                   className="block w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-white font-medium"
                 >
-                  <option value="Menunggu Tindakan">⏳ Menunggu Tindakan Radiografer</option>
-                  <option value="Sedang Diperiksa">🔬 Sedang Diperiksa</option>
-                  <option value="Selesai">✅ Selesai Diperiksa</option>
+                  <option value="Menunggu Tindakan">Menunggu Tindakan Radiografer</option>
+                  <option value="Sedang Diperiksa">Sedang Diperiksa</option>
+                  <option value="Selesai">Selesai Diperiksa</option>
                 </select>
               </div>
 
